@@ -222,5 +222,14 @@ export const extractTxError = (params: IExtractTxError): FuelError => {
   if (isPanic) {
     return assemblePanicError(statusReason, metadata);
   }
-  return assembleRevertError(receipts, logs, metadata, statusReason, abis);
+  const decodedLogs = logs.filter((l: unknown) => {
+    const log = l as unknown;
+    return !(
+      log !== null &&
+      typeof log === 'object' &&
+      '__decoded' in log &&
+      (log as { __decoded: boolean }).__decoded === false
+    );
+  });
+  return assembleRevertError(receipts, decodedLogs, metadata, statusReason, abis);
 };
